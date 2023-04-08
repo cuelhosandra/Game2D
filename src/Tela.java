@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 
 public class Tela extends Canvas implements Runnable {
 
@@ -10,13 +12,14 @@ public class Tela extends Canvas implements Runnable {
     private Thread thread;
     private boolean isRunning = true;
     private int frames = 0;
-
+    private final BufferedImage image;
 
 
     public Tela() {
         //Tamanho da nossa tela
         this.setPreferredSize(new Dimension(LARGURA *ESCALA, ALTURA * ESCALA));
         initFrame();
+        image = new BufferedImage(LARGURA, ALTURA, BufferedImage.TYPE_INT_RGB);
     }
     //Inicialização da tela
     private void initFrame() {
@@ -55,7 +58,6 @@ public class Tela extends Canvas implements Runnable {
             }
 
             if (System.currentTimeMillis() - timer >= 1000) {
-//                System.out.println("FPS: "+frames);
                 frame.setTitle("Meu jogo JAVA GAME COM O FPS: " + frames);
                 frames = 0;
                 timer += 1000;
@@ -81,10 +83,32 @@ public class Tela extends Canvas implements Runnable {
         thread.start();
     }
     private void tick() {
-        System.out.println("TICK OK ");
+
 
     }
     private void render() {
+        BufferStrategy bs = this.getBufferStrategy();
+        if (bs == null){
+            this.createBufferStrategy(3);
+            return;
+        }
+
+        Graphics g = image.getGraphics();
+        //Render do game - estamos pintando a tela de fundo
+        g.setColor(new Color(0,0,0));
+        g.fillRect(0,0,LARGURA, ALTURA);
+        g = bs.getDrawGraphics();
+        g.drawImage(image, 0,0,LARGURA * ESCALA, ALTURA * ESCALA, null);
+        //A partir daqui tudo será renderizado em cima da cor do background
+
+        //RENDERIZANDO UM TEXTO
+        g.setColor(new Color(255,0,0));
+        g.setFont(new Font("arial", Font.BOLD, 30));
+        g.drawString("TESTANDO TEXTO RENDER ", 50,250);
+
+        //Final dos objetos a serem desenhados
+        bs.show();
+        g.dispose(); //desalocar coisas inuteis da memoria
     }
 
 
